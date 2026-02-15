@@ -16,9 +16,7 @@ This is a learning project focused on clean pricing logic, clear assumptions, an
 - Domestic currency is QUOTE, foreign currency is BASE
 - PV is reported in the quote currency
 
-## Quickstart
-
-Create a venv, install deps, run tests:
+## Run locally
 
 ```bash
 python3 -m venv .venv
@@ -26,3 +24,4 @@ source .venv/bin/activate
 python -m pip install -U pip
 pip install -e ".[dev]"
 pytest -q
+streamlit run apps/streamlit_app.py
