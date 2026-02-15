@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-
 import pandas as pd
 import streamlit as st
 
@@ -99,7 +98,7 @@ with fx_tab:
             domestic_defaults,
             key="domestic_curve_editor",
             num_rows="dynamic",
-            use_container_width=True,
+            width="stretch",
         )
     with t2:
         st.markdown("**Foreign Curve (tenor / zero_rate)**")
@@ -107,7 +106,7 @@ with fx_tab:
             foreign_defaults,
             key="foreign_curve_editor",
             num_rows="dynamic",
-            use_container_width=True,
+            width="stretch",
         )
 
     try:
@@ -164,7 +163,7 @@ with fx_tab:
             spot_shock_pct=scenario_spot_shock_pct,
             rate_shock_bps=scenario_rate_shock_bps,
         )
-        st.dataframe(scenario_df, use_container_width=True)
+        st.dataframe(scenario_df, width="stretch")
 
         client_note_md = build_fx_forward_client_note(
             pair=pair,
