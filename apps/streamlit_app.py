@@ -2,15 +2,9 @@
 
 from __future__ import annotations
 
-import sys
-from pathlib import Path
 
 import pandas as pd
 import streamlit as st
-
-SRC_PATH = Path(__file__).resolve().parents[1] / "src"
-if str(SRC_PATH) not in sys.path:
-    sys.path.insert(0, str(SRC_PATH))
 
 from fm_toolkit.curves import ZeroCurve
 from fm_toolkit.fx_forwards import forward_rate, price_fx_forward
