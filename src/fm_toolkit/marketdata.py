@@ -63,9 +63,13 @@ class FrankfurterProvider(SpotProvider):
             response.raise_for_status()
             payload = response.json()
         except requests.RequestException as exc:
-            raise RuntimeError(f"Frankfurter request failed for {base}/{quote}: {exc}") from exc
+            raise RuntimeError(
+                f"Frankfurter request failed for {base}/{quote}: {exc}"
+            ) from exc
         except ValueError as exc:
-            raise RuntimeError(f"Frankfurter returned invalid JSON for {base}/{quote}: {exc}") from exc
+            raise RuntimeError(
+                f"Frankfurter returned invalid JSON for {base}/{quote}: {exc}"
+            ) from exc
 
         rates = payload.get("rates")
         if not isinstance(rates, dict) or quote not in rates:
@@ -74,7 +78,9 @@ class FrankfurterProvider(SpotProvider):
         try:
             spot = float(rates[quote])
         except (TypeError, ValueError) as exc:
-            raise RuntimeError(f"Frankfurter returned non-numeric rate for {base}/{quote}") from exc
+            raise RuntimeError(
+                f"Frankfurter returned non-numeric rate for {base}/{quote}"
+            ) from exc
 
         ts = str(payload.get("date") or datetime.now(timezone.utc).isoformat())
         return spot, ts, "Frankfurter"
@@ -91,9 +97,13 @@ class TwelveDataProvider(SpotProvider):
         timeout: tuple[float, float] = _DEFAULT_TIMEOUT,
         fallback_provider: SpotProvider | None = None,
     ) -> None:
-        self.api_key = api_key if api_key is not None else os.getenv("TWELVEDATA_API_KEY")
+        self.api_key = (
+            api_key if api_key is not None else os.getenv("TWELVEDATA_API_KEY")
+        )
         self.timeout = timeout
-        self.fallback_provider = fallback_provider or FrankfurterProvider(timeout=timeout)
+        self.fallback_provider = fallback_provider or FrankfurterProvider(
+            timeout=timeout
+        )
 
     def get_spot(self, base: str, quote: str) -> tuple[float, str, str]:
         base, quote = parse_pair(f"{base}/{quote}")
@@ -108,18 +118,26 @@ class TwelveDataProvider(SpotProvider):
             response.raise_for_status()
             payload = response.json()
         except requests.RequestException as exc:
-            return self._fallback(base, quote, f"Twelve Data request failed for {pair}: {exc}")
+            return self._fallback(
+                base, quote, f"Twelve Data request failed for {pair}: {exc}"
+            )
         except ValueError as exc:
-            return self._fallback(base, quote, f"Twelve Data returned invalid JSON for {pair}: {exc}")
+            return self._fallback(
+                base, quote, f"Twelve Data returned invalid JSON for {pair}: {exc}"
+            )
 
         if str(payload.get("status", "")).lower() == "error":
             message = payload.get("message") or payload.get("code") or "unknown error"
-            return self._fallback(base, quote, f"Twelve Data API error for {pair}: {message}")
+            return self._fallback(
+                base, quote, f"Twelve Data API error for {pair}: {message}"
+            )
 
         try:
             spot = float(payload["rate"])
         except (KeyError, TypeError, ValueError):
-            return self._fallback(base, quote, f"Twelve Data response missing numeric rate for {pair}")
+            return self._fallback(
+                base, quote, f"Twelve Data response missing numeric rate for {pair}"
+            )
 
         ts = self._parse_timestamp(payload)
         return spot, ts, "Twelve Data"
@@ -129,7 +147,9 @@ class TwelveDataProvider(SpotProvider):
             spot, ts, source = self.fallback_provider.get_spot(base, quote)
             return spot, ts, f"{source} (fallback)"
         except Exception as exc:  # noqa: BLE001
-            raise RuntimeError(f"{reason}. Fallback provider failed for {base}/{quote}: {exc}") from exc
+            raise RuntimeError(
+                f"{reason}. Fallback provider failed for {base}/{quote}: {exc}"
+            ) from exc
 
     @staticmethod
     def _parse_timestamp(payload: dict[str, object]) -> str:

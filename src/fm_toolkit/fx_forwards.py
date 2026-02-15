@@ -5,7 +5,9 @@ from __future__ import annotations
 from .curves import ZeroCurve
 
 
-def _flat_curve_from_rate(rate: float | None, rate_name: str, curve_name: str) -> ZeroCurve:
+def _flat_curve_from_rate(
+    rate: float | None, rate_name: str, curve_name: str
+) -> ZeroCurve:
     if rate is None:
         raise ValueError(f"{rate_name} is required when {curve_name} is not provided")
     return ZeroCurve(times=[1.0], zero_rates=[float(rate)])
@@ -18,9 +20,13 @@ def _resolve_curves(
     foreign_rate: float | None,
 ) -> tuple[ZeroCurve, ZeroCurve]:
     if domestic_curve is None:
-        domestic_curve = _flat_curve_from_rate(domestic_rate, "domestic_rate", "domestic_curve")
+        domestic_curve = _flat_curve_from_rate(
+            domestic_rate, "domestic_rate", "domestic_curve"
+        )
     if foreign_curve is None:
-        foreign_curve = _flat_curve_from_rate(foreign_rate, "foreign_rate", "foreign_curve")
+        foreign_curve = _flat_curve_from_rate(
+            foreign_rate, "foreign_rate", "foreign_curve"
+        )
     return domestic_curve, foreign_curve
 
 

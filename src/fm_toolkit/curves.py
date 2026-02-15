@@ -68,7 +68,9 @@ class ZeroCurve:
         return cls(times=times, zero_rates=rates)
 
     @classmethod
-    def from_tenors(cls, tenors: Sequence[str], zero_rates: Sequence[float]) -> "ZeroCurve":
+    def from_tenors(
+        cls, tenors: Sequence[str], zero_rates: Sequence[float]
+    ) -> "ZeroCurve":
         """Build a curve from tenor labels and zero rates."""
 
         if len(tenors) != len(zero_rates):

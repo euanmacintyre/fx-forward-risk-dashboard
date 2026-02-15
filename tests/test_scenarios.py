@@ -72,8 +72,12 @@ def test_fx_forward_scenarios_spot_pnl_direction() -> None:
         foreign_curve=foreign_curve,
     )
 
-    spot_up_pnl = float(df.loc[df["Scenario name"] == "Spot +1%", "PnL vs base"].iloc[0])
-    spot_down_pnl = float(df.loc[df["Scenario name"] == "Spot -1%", "PnL vs base"].iloc[0])
+    spot_up_pnl = float(
+        df.loc[df["Scenario name"] == "Spot +1%", "PnL vs base"].iloc[0]
+    )
+    spot_down_pnl = float(
+        df.loc[df["Scenario name"] == "Spot -1%", "PnL vs base"].iloc[0]
+    )
 
     assert spot_up_pnl > 0.0
     assert spot_down_pnl < 0.0

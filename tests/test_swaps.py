@@ -3,11 +3,15 @@ from fm_toolkit.swaps import VanillaSwap, par_swap_rate, swap_pv, swap_pv01
 
 
 def test_par_swap_rate_gives_near_zero_pv() -> None:
-    curve = ZeroCurve(times=[1, 2, 3, 5, 10], zero_rates=[0.02, 0.022, 0.024, 0.026, 0.028])
+    curve = ZeroCurve(
+        times=[1, 2, 3, 5, 10], zero_rates=[0.02, 0.022, 0.024, 0.026, 0.028]
+    )
     maturity = 5
     pay_freq = 2
 
-    par = par_swap_rate(curve=curve, maturity_years=maturity, payments_per_year=pay_freq)
+    par = par_swap_rate(
+        curve=curve, maturity_years=maturity, payments_per_year=pay_freq
+    )
     swap = VanillaSwap(
         notional=5_000_000,
         fixed_rate=par,
@@ -21,7 +25,9 @@ def test_par_swap_rate_gives_near_zero_pv() -> None:
 
 
 def test_swap_pv01_sign_by_direction() -> None:
-    curve = ZeroCurve(times=[1, 2, 3, 5, 10], zero_rates=[0.02, 0.022, 0.024, 0.026, 0.028])
+    curve = ZeroCurve(
+        times=[1, 2, 3, 5, 10], zero_rates=[0.02, 0.022, 0.024, 0.026, 0.028]
+    )
 
     payer = VanillaSwap(
         notional=10_000_000,

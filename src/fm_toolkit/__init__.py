@@ -2,7 +2,13 @@
 
 from .curves import ZeroCurve, parse_tenor
 from .fx_forwards import forward_rate, price_fx_forward
-from .marketdata import FrankfurterProvider, SpotProvider, TwelveDataProvider, get_live_spot, parse_pair
+from .marketdata import (
+    FrankfurterProvider,
+    SpotProvider,
+    TwelveDataProvider,
+    get_live_spot,
+    parse_pair,
+)
 from .report import build_fx_forward_client_note
 from .scenarios import fx_forward_scenarios
 from .swaps import VanillaSwap, par_swap_rate, swap_pv, swap_pv01

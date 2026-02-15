@@ -61,7 +61,9 @@ def run_fx_forward(args: argparse.Namespace) -> None:
 
 
 def run_swap(args: argparse.Namespace) -> None:
-    curve = ZeroCurve(times=[1, 2, 3, 5, 10], zero_rates=[0.02, 0.022, 0.024, 0.026, 0.028])
+    curve = ZeroCurve(
+        times=[1, 2, 3, 5, 10], zero_rates=[0.02, 0.022, 0.024, 0.026, 0.028]
+    )
     par = par_swap_rate(
         curve=curve,
         maturity_years=args.maturity,

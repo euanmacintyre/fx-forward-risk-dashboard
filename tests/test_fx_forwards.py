@@ -11,7 +11,9 @@ def test_fx_forward_pv_is_zero_at_fair_strike() -> None:
     maturity = 1.5
     notional = 2_000_000
 
-    fair_strike = forward_rate(spot=spot, domestic_rate=rd, foreign_rate=rf, maturity_years=maturity)
+    fair_strike = forward_rate(
+        spot=spot, domestic_rate=rd, foreign_rate=rf, maturity_years=maturity
+    )
     pv = price_fx_forward(
         notional_base=notional,
         strike=fair_strike,
@@ -31,7 +33,9 @@ def test_fx_forward_pv_sign_for_favorable_strike() -> None:
     maturity = 1.0
     notional = 1_000_000
 
-    fair_strike = forward_rate(spot=spot, domestic_rate=rd, foreign_rate=rf, maturity_years=maturity)
+    fair_strike = forward_rate(
+        spot=spot, domestic_rate=rd, foreign_rate=rf, maturity_years=maturity
+    )
     better_strike = fair_strike - 0.015
 
     pv = price_fx_forward(

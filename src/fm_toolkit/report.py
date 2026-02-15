@@ -26,9 +26,7 @@ def _curve_points_table(curve: ZeroCurve, max_points: int = 5) -> str:
 
 def _pv_explanation(strike: float, fair_forward: float, pv: float) -> str:
     if abs(pv) < 1e-8:
-        return (
-            "The chosen strike is effectively at the market fair forward, so the trade is near zero value today."
-        )
+        return "The chosen strike is effectively at the market fair forward, so the trade is near zero value today."
     if pv > 0:
         return (
             "PV is positive because the agreed strike is below the current fair forward, "
@@ -150,7 +148,9 @@ def build_fx_forward_client_note(
 
 
 def build_demo_report() -> str:
-    curve = ZeroCurve(times=[1, 2, 3, 5, 10], zero_rates=[0.02, 0.022, 0.024, 0.026, 0.028])
+    curve = ZeroCurve(
+        times=[1, 2, 3, 5, 10], zero_rates=[0.02, 0.022, 0.024, 0.026, 0.028]
+    )
 
     spot = 1.10
     rd = 0.03
@@ -159,7 +159,9 @@ def build_demo_report() -> str:
     strike = 1.12
     fx_notional = 5_000_000
 
-    fair_fwd = forward_rate(spot=spot, domestic_rate=rd, foreign_rate=rf, maturity_years=tenor)
+    fair_fwd = forward_rate(
+        spot=spot, domestic_rate=rd, foreign_rate=rf, maturity_years=tenor
+    )
     fx_pv = price_fx_forward(
         notional_base=fx_notional,
         strike=strike,
@@ -171,7 +173,9 @@ def build_demo_report() -> str:
 
     maturity = 5
     pay_freq = 2
-    par_rate = par_swap_rate(curve=curve, maturity_years=maturity, payments_per_year=pay_freq)
+    par_rate = par_swap_rate(
+        curve=curve, maturity_years=maturity, payments_per_year=pay_freq
+    )
     swap = VanillaSwap(
         notional=10_000_000,
         fixed_rate=par_rate + 0.0025,

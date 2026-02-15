@@ -32,7 +32,9 @@ def _build_curve_from_table(table: pd.DataFrame, curve_name: str) -> ZeroCurve:
         if tenor_raw == "":
             continue
         if rate_raw in ("", None):
-            raise ValueError(f"{curve_name}: zero_rate is missing for tenor {tenor_raw}")
+            raise ValueError(
+                f"{curve_name}: zero_rate is missing for tenor {tenor_raw}"
+            )
 
         tenors.append(tenor_raw)
         zero_rates.append(float(rate_raw))
@@ -57,7 +59,9 @@ with fx_tab:
     st.subheader("FX Forward")
     c1, c2, c3, c4 = st.columns(4)
     pair = c1.selectbox("Pair", options=_COMMON_PAIRS, index=0, key="fx_pair_select")
-    manual_override = c2.checkbox("Manual override", value=False, key="fx_manual_spot_override")
+    manual_override = c2.checkbox(
+        "Manual override", value=False, key="fx_manual_spot_override"
+    )
     strike = c3.number_input("Strike", value=1.12, format="%.6f")
     notional = c4.number_input("Base Notional", value=5_000_000.0, step=100_000.0)
 
@@ -191,7 +195,9 @@ with fx_tab:
 
 with swap_tab:
     st.subheader("Vanilla Swap")
-    curve = ZeroCurve(times=[1, 2, 3, 5, 10], zero_rates=[0.02, 0.022, 0.024, 0.026, 0.028])
+    curve = ZeroCurve(
+        times=[1, 2, 3, 5, 10], zero_rates=[0.02, 0.022, 0.024, 0.026, 0.028]
+    )
 
     s1, s2, s3, s4 = st.columns(4)
     maturity_years = s1.number_input("Maturity", value=5.0, step=1.0)

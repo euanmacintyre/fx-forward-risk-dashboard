@@ -1,6 +1,11 @@
 import pytest
 
-from fm_toolkit.marketdata import FrankfurterProvider, SpotProvider, TwelveDataProvider, parse_pair
+from fm_toolkit.marketdata import (
+    FrankfurterProvider,
+    SpotProvider,
+    TwelveDataProvider,
+    parse_pair,
+)
 
 
 def test_parse_pair_common_cases() -> None:
@@ -25,7 +30,9 @@ def test_frankfurter_provider_mocked_response(monkeypatch: pytest.MonkeyPatch) -
         def json(self) -> dict[str, object]:
             return {"date": "2026-02-15", "rates": {"USD": 1.105}}
 
-    def fake_get(url: str, params: dict[str, str], timeout: tuple[float, float]) -> MockResponse:
+    def fake_get(
+        url: str, params: dict[str, str], timeout: tuple[float, float]
+    ) -> MockResponse:
         captured["url"] = url
         captured["params"] = params
         captured["timeout"] = timeout
@@ -50,7 +57,9 @@ class _MockFallbackProvider(SpotProvider):
 
 
 def test_twelvedata_falls_back_when_key_missing() -> None:
-    provider = TwelveDataProvider(api_key=None, fallback_provider=_MockFallbackProvider())
+    provider = TwelveDataProvider(
+        api_key=None, fallback_provider=_MockFallbackProvider()
+    )
 
     spot, ts, source = provider.get_spot("EUR", "USD")
 

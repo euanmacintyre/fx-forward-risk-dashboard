@@ -57,7 +57,9 @@ def fixed_leg_pv(
 ) -> float:
     times = payment_times(maturity_years, payments_per_year)
     accrual = 1.0 / payments_per_year
-    return notional * fixed_rate * sum(accrual * curve.discount_factor(t) for t in times)
+    return (
+        notional * fixed_rate * sum(accrual * curve.discount_factor(t) for t in times)
+    )
 
 
 def floating_leg_pv(notional: float, curve: ZeroCurve, maturity_years: float) -> float:
