@@ -36,5 +36,11 @@ streamlit run apps/streamlit_app.py
 
 ## Notes
 
-- `tests/test_fx_forwards.py` covers FX forward no-arbitrage behavior.
+- FX forward pricing supports full domestic/foreign discount curves:
+  - `F = S * DF_foreign(T) / DF_domestic(T)`
+  - Flat-rate calls are still supported for backward compatibility.
+- In the Streamlit FX tab, edit domestic/foreign tenor-rate tables (`1M`, `3M`, `6M`, `1Y`, `2Y`) to see fair forward update from curve shape changes.
+- The Streamlit FX tab includes a scenario table with configurable `spot_shock_pct` and `rate_shock_bps`.
+- The Streamlit FX tab includes a `Download Client Note (Markdown)` button that exports `ing_fm_client_note.md`.
+- `tests/test_fx_forwards.py` covers FX forward no-arbitrage behavior plus curve-based tenor sensitivity.
 - `tests/test_swaps.py` covers swap par pricing and PV01 directionality.

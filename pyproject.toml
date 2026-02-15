@@ -12,9 +12,11 @@ dependencies = []
 
 [project.optional-dependencies]
 app = [
+  "pandas>=2.0",
   "streamlit>=1.32",
 ]
 dev = [
+  "pandas>=2.0",
   "pytest>=8.0",
   "streamlit>=1.32",
 ]
