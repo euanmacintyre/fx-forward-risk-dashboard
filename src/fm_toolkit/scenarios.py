@@ -56,15 +56,16 @@ def fx_forward_scenarios(
     )
 
     scenario_defs = [
-        ("Spot -1%", -spot_shock_pct, 0.0, 0.0),
-        ("Spot +1%", spot_shock_pct, 0.0, 0.0),
-        ("Domestic +25bp", 0.0, rate_shock_bps, 0.0),
-        ("Domestic -25bp", 0.0, -rate_shock_bps, 0.0),
-        ("Foreign +25bp", 0.0, 0.0, rate_shock_bps),
-        ("Foreign -25bp", 0.0, 0.0, -rate_shock_bps),
-        ("Spot +1% & Domestic +25bp", spot_shock_pct, rate_shock_bps, 0.0),
-        ("Spot -1% & Domestic -25bp", -spot_shock_pct, -rate_shock_bps, 0.0),
-    ]
+    (f"Spot -{spot_shock_pct:g}%", -spot_shock_pct, 0.0, 0.0),
+    (f"Spot +{spot_shock_pct:g}%", spot_shock_pct, 0.0, 0.0),
+    (f"Domestic +{rate_shock_bps:g}bp", 0.0, rate_shock_bps, 0.0),
+    (f"Domestic -{rate_shock_bps:g}bp", 0.0, -rate_shock_bps, 0.0),
+    (f"Foreign +{rate_shock_bps:g}bp", 0.0, 0.0, rate_shock_bps),
+    (f"Foreign -{rate_shock_bps:g}bp", 0.0, 0.0, -rate_shock_bps),
+    (f"Spot +{spot_shock_pct:g}% & Domestic +{rate_shock_bps:g}bp", spot_shock_pct, rate_shock_bps, 0.0),
+    (f"Spot -{spot_shock_pct:g}% & Domestic -{rate_shock_bps:g}bp", -spot_shock_pct, -rate_shock_bps, 0.0),
+]
+
 
     rows: list[dict[str, float | str]] = []
     for name, spot_shock_pct_value, domestic_bps, foreign_bps in scenario_defs:

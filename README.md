@@ -16,6 +16,15 @@ This is a learning project focused on clean pricing logic, clear assumptions, an
 - Domestic currency is QUOTE, foreign currency is BASE
 - PV is reported in the quote currency
 
+## Live spot
+The app fetches an indicative spot rate.
+It uses Twelve Data if `TWELVEDATA_API_KEY` is set.
+If not, it falls back to Frankfurter which is typically end of day.
+
+To enable Twelve Data:
+- copy `.env.example` to `.env`
+- set `TWELVEDATA_API_KEY`
+
 ## Run locally
 
 ```bash
