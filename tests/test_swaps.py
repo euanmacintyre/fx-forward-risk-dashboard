@@ -1,5 +1,5 @@
-from ing_fm.curves import ZeroCurve
-from ing_fm.swaps import VanillaSwap, par_swap_rate, swap_pv, swap_pv01
+from fm_toolkit.curves import ZeroCurve
+from fm_toolkit.swaps import VanillaSwap, par_swap_rate, swap_pv, swap_pv01
 
 
 def test_par_swap_rate_gives_near_zero_pv() -> None:

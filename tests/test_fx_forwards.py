@@ -1,7 +1,7 @@
 import pytest
 
-from ing_fm.curves import ZeroCurve, parse_tenor
-from ing_fm.fx_forwards import forward_rate, price_fx_forward
+from fm_toolkit.curves import ZeroCurve, parse_tenor
+from fm_toolkit.fx_forwards import forward_rate, price_fx_forward
 
 
 def test_fx_forward_pv_is_zero_at_fair_strike() -> None:

@@ -1,8 +1,8 @@
 import pytest
 
-from ing_fm.curves import ZeroCurve
-from ing_fm.fx_forwards import forward_rate
-from ing_fm.scenarios import fx_forward_scenarios
+from fm_toolkit.curves import ZeroCurve
+from fm_toolkit.fx_forwards import forward_rate
+from fm_toolkit.scenarios import fx_forward_scenarios
 
 
 def test_fx_forward_scenarios_table_shape_and_names() -> None:

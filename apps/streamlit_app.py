@@ -1,4 +1,4 @@
-"""Streamlit demo app for ING FM pricing."""
+"""Streamlit demo app for FX & rates pricing."""
 
 from __future__ import annotations
 
@@ -12,11 +12,14 @@ SRC_PATH = Path(__file__).resolve().parents[1] / "src"
 if str(SRC_PATH) not in sys.path:
     sys.path.insert(0, str(SRC_PATH))
 
-from ing_fm.curves import ZeroCurve
-from ing_fm.fx_forwards import forward_rate, price_fx_forward
-from ing_fm.report import build_fx_forward_client_note
-from ing_fm.scenarios import fx_forward_scenarios
-from ing_fm.swaps import VanillaSwap, par_swap_rate, swap_pv, swap_pv01
+from fm_toolkit.curves import ZeroCurve
+from fm_toolkit.fx_forwards import forward_rate, price_fx_forward
+from fm_toolkit.marketdata import get_live_spot, parse_pair
+from fm_toolkit.report import build_fx_forward_client_note
+from fm_toolkit.scenarios import fx_forward_scenarios
+from fm_toolkit.swaps import VanillaSwap, par_swap_rate, swap_pv, swap_pv01
+
+_COMMON_PAIRS = ["EUR/USD", "GBP/USD", "USD/JPY", "EUR/GBP", "AUD/USD"]
 
 
 def _build_curve_from_table(table: pd.DataFrame, curve_name: str) -> ZeroCurve:
@@ -39,18 +42,41 @@ def _build_curve_from_table(table: pd.DataFrame, curve_name: str) -> ZeroCurve:
     return ZeroCurve.from_tenors(tenors=tenors, zero_rates=zero_rates)
 
 
-st.set_page_config(page_title="ING FM Demo", layout="wide")
-st.title("ING FM Pricing Demo")
+@st.cache_data(ttl=60)
+def _fetch_cached_spot(pair: str) -> tuple[float, str, str]:
+    base, quote = parse_pair(pair)
+    return get_live_spot(base=base, quote=quote)
+
+
+st.set_page_config(page_title="FX & Rates Pricing Demo", layout="wide")
+st.title("FX & Rates Pricing Demo")
 
 fx_tab, swap_tab = st.tabs(["FX Forward", "Swap"])
 
 with fx_tab:
     st.subheader("FX Forward")
     c1, c2, c3, c4 = st.columns(4)
-    spot = c1.number_input("Spot", value=1.10, format="%.6f")
-    strike = c2.number_input("Strike", value=1.12, format="%.6f")
-    notional = c3.number_input("Base Notional", value=5_000_000.0, step=100_000.0)
-    pair = c4.text_input("Pair", value="EUR/USD")
+    pair = c1.selectbox("Pair", options=_COMMON_PAIRS, index=0, key="fx_pair_select")
+    manual_override = c2.checkbox("Manual override", value=False, key="fx_manual_spot_override")
+    strike = c3.number_input("Strike", value=1.12, format="%.6f")
+    notional = c4.number_input("Base Notional", value=5_000_000.0, step=100_000.0)
+
+    live_source = "Unavailable"
+    live_ts = "Unavailable"
+    fallback_spot = float(st.session_state.get("fx_spot_value", 1.10))
+    try:
+        fetched_spot, live_ts, live_source = _fetch_cached_spot(pair)
+    except RuntimeError as exc:
+        st.warning(f"Live spot fetch failed for {pair}: {exc}")
+        fetched_spot = fallback_spot
+
+    if "fx_spot_value" not in st.session_state:
+        st.session_state["fx_spot_value"] = float(fetched_spot)
+    if not manual_override:
+        st.session_state["fx_spot_value"] = float(fetched_spot)
+
+    spot = st.number_input("Spot", key="fx_spot_value", format="%.6f")
+    st.caption(f"Source: {live_source} | Last updated: {live_ts}")
 
     maturity = st.number_input("Maturity (years)", value=1.0, step=0.25, min_value=0.01)
 
@@ -159,7 +185,7 @@ with fx_tab:
         st.download_button(
             label="Download Client Note (Markdown)",
             data=client_note_md,
-            file_name="ing_fm_client_note.md",
+            file_name="fm_toolkit_client_note.md",
             mime="text/markdown",
         )
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CLI demo for ING FM pricing."""
+"""CLI demo for FX & rates pricing."""
 
 from __future__ import annotations
 
@@ -11,14 +11,14 @@ SRC_PATH = Path(__file__).resolve().parents[1] / "src"
 if str(SRC_PATH) not in sys.path:
     sys.path.insert(0, str(SRC_PATH))
 
-from ing_fm.curves import ZeroCurve
-from ing_fm.fx_forwards import forward_rate, price_fx_forward
-from ing_fm.report import build_demo_report
-from ing_fm.swaps import VanillaSwap, par_swap_rate, swap_pv, swap_pv01
+from fm_toolkit.curves import ZeroCurve
+from fm_toolkit.fx_forwards import forward_rate, price_fx_forward
+from fm_toolkit.report import build_demo_report
+from fm_toolkit.swaps import VanillaSwap, par_swap_rate, swap_pv, swap_pv01
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="ING FM pricing demo CLI")
+    parser = argparse.ArgumentParser(description="FX & Rates Pricing Demo CLI")
     subparsers = parser.add_subparsers(dest="command")
 
     subparsers.add_parser("demo", help="Print combined demo report")

@@ -116,7 +116,7 @@ def build_fx_forward_client_note(
     scenario_md = _scenario_markdown_table(scenario_df=scenario_df, top_n=6)
 
     lines = [
-        "# ING FM Client Note - FX Forward",
+        "# FX & Rates Client Note - FX Forward",
         "",
         "## Trade Summary",
         f"- Pair: {pair}",
@@ -183,7 +183,7 @@ def build_demo_report() -> str:
     pv01 = swap_pv01(swap=swap, curve=curve)
 
     lines = [
-        "ING FM Demo Report",
+        "FX & Rates Pricing Demo Report",
         "==================",
         f"FX fair forward: {fair_fwd:.6f}",
         f"FX forward PV (domestic): {fx_pv:,.2f}",

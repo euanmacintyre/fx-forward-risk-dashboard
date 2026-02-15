@@ -3,14 +3,19 @@ requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "ing-fm"
+name = "fm-toolkit"
 version = "0.1.0"
-description = "ING FM demo pricing and risk toolkit"
+description = "FX & Rates Pricing Demo toolkit"
 readme = "README.md"
 requires-python = ">=3.10"
-dependencies = []
+dependencies = [
+  "requests>=2.31",
+]
 
 [project.optional-dependencies]
+dotenv = [
+  "python-dotenv>=1.0",
+]
 app = [
   "pandas>=2.0",
   "streamlit>=1.32",

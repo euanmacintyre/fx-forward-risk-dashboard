@@ -1,6 +1,6 @@
-from ing_fm.curves import ZeroCurve
-from ing_fm.report import build_fx_forward_client_note
-from ing_fm.scenarios import fx_forward_scenarios
+from fm_toolkit.curves import ZeroCurve
+from fm_toolkit.report import build_fx_forward_client_note
+from fm_toolkit.scenarios import fx_forward_scenarios
 
 
 def test_build_fx_forward_client_note_contains_required_sections() -> None:
