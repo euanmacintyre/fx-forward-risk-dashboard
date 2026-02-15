@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
+import os
 from abc import ABC, abstractmethod
 from datetime import datetime, timezone
-import os
 
 import requests
 
@@ -38,6 +38,12 @@ def parse_pair(pair: str) -> tuple[str, str]:
     return base, quote
 
 
+def _invert_rate(rate: float, pair: str) -> float:
+    if rate <= 0:
+        raise RuntimeError(f"cannot invert non-positive rate for {pair}: {rate}")
+    return 1.0 / rate
+
+
 class SpotProvider(ABC):
     """Abstract provider interface for spot FX rates."""
 
@@ -56,6 +62,36 @@ class FrankfurterProvider(SpotProvider):
 
     def get_spot(self, base: str, quote: str) -> tuple[float, str, str]:
         base, quote = parse_pair(f"{base}/{quote}")
+        pair = f"{base}/{quote}"
+
+        payload = self._request_latest(base, quote)
+        spot, missing_reason = self._extract_rate(payload, quote, pair)
+        if spot is not None:
+            ts = str(payload.get("date") or datetime.now(timezone.utc).isoformat())
+            return spot, ts, "Frankfurter"
+
+        inverse_pair = f"{quote}/{base}"
+        try:
+            inverse_payload = self._request_latest(quote, base)
+        except RuntimeError as exc:
+            raise RuntimeError(
+                f"{missing_reason}. Inverse lookup for {inverse_pair} failed: {exc}"
+            ) from exc
+
+        inverse_rate, inverse_reason = self._extract_rate(
+            inverse_payload, base, inverse_pair
+        )
+        if inverse_rate is None:
+            raise RuntimeError(
+                f"{missing_reason}. Inverse lookup for {inverse_pair} failed: {inverse_reason}"
+            )
+
+        spot = _invert_rate(inverse_rate, inverse_pair)
+        ts = str(inverse_payload.get("date") or datetime.now(timezone.utc).isoformat())
+        return spot, ts, "Frankfurter (inverted)"
+
+    def _request_latest(self, base: str, quote: str) -> dict[str, object]:
+        pair = f"{base}/{quote}"
         params = {"base": base, "symbols": quote}
 
         try:
@@ -63,27 +99,33 @@ class FrankfurterProvider(SpotProvider):
             response.raise_for_status()
             payload = response.json()
         except requests.RequestException as exc:
-            raise RuntimeError(
-                f"Frankfurter request failed for {base}/{quote}: {exc}"
-            ) from exc
+            raise RuntimeError(f"Frankfurter request failed for {pair}: {exc}") from exc
         except ValueError as exc:
             raise RuntimeError(
-                f"Frankfurter returned invalid JSON for {base}/{quote}: {exc}"
+                f"Frankfurter returned invalid JSON for {pair}: {exc}"
             ) from exc
 
+        if not isinstance(payload, dict):
+            raise RuntimeError(
+                f"Frankfurter returned unexpected JSON structure for {pair}"
+            )
+        return payload
+
+    @staticmethod
+    def _extract_rate(
+        payload: dict[str, object], quote: str, pair: str
+    ) -> tuple[float | None, str]:
         rates = payload.get("rates")
         if not isinstance(rates, dict) or quote not in rates:
-            raise RuntimeError(f"Frankfurter response missing rate for {base}/{quote}")
+            return None, f"Frankfurter response missing rate for {pair}"
 
         try:
-            spot = float(rates[quote])
-        except (TypeError, ValueError) as exc:
-            raise RuntimeError(
-                f"Frankfurter returned non-numeric rate for {base}/{quote}"
-            ) from exc
-
-        ts = str(payload.get("date") or datetime.now(timezone.utc).isoformat())
-        return spot, ts, "Frankfurter"
+            rate = float(rates[quote])
+        except (TypeError, ValueError):
+            return None, f"Frankfurter returned non-numeric rate for {pair}"
+        if rate <= 0:
+            return None, f"Frankfurter returned non-positive rate for {pair}"
+        return rate, ""
 
 
 class TwelveDataProvider(SpotProvider):
@@ -112,11 +154,8 @@ class TwelveDataProvider(SpotProvider):
         if not self.api_key:
             return self._fallback(base, quote, "TWELVEDATA_API_KEY is not set")
 
-        params = {"symbol": pair, "apikey": self.api_key}
         try:
-            response = requests.get(self.endpoint, params=params, timeout=self.timeout)
-            response.raise_for_status()
-            payload = response.json()
+            payload = self._request_exchange_rate(pair)
         except requests.RequestException as exc:
             return self._fallback(
                 base, quote, f"Twelve Data request failed for {pair}: {exc}"
@@ -126,21 +165,45 @@ class TwelveDataProvider(SpotProvider):
                 base, quote, f"Twelve Data returned invalid JSON for {pair}: {exc}"
             )
 
-        if str(payload.get("status", "")).lower() == "error":
-            message = payload.get("message") or payload.get("code") or "unknown error"
+        spot, reason = self._extract_rate(payload, pair)
+        if spot is not None:
+            ts = self._parse_timestamp(payload)
+            return spot, ts, "Twelve Data"
+
+        inverse_pair = f"{quote}/{base}"
+        try:
+            inverse_payload = self._request_exchange_rate(inverse_pair)
+        except requests.RequestException as exc:
             return self._fallback(
-                base, quote, f"Twelve Data API error for {pair}: {message}"
+                base,
+                quote,
+                f"{reason}. Inverse lookup for {inverse_pair} failed: {exc}",
+            )
+        except ValueError as exc:
+            return self._fallback(
+                base,
+                quote,
+                f"{reason}. Inverse lookup for {inverse_pair} failed: {exc}",
+            )
+
+        inverse_rate, inverse_reason = self._extract_rate(inverse_payload, inverse_pair)
+        if inverse_rate is None:
+            return self._fallback(
+                base,
+                quote,
+                f"{reason}. Inverse lookup for {inverse_pair} failed: {inverse_reason}",
             )
 
         try:
-            spot = float(payload["rate"])
-        except (KeyError, TypeError, ValueError):
+            inverted_spot = _invert_rate(inverse_rate, inverse_pair)
+        except RuntimeError as exc:
             return self._fallback(
-                base, quote, f"Twelve Data response missing numeric rate for {pair}"
+                base,
+                quote,
+                f"{reason}. Inverse lookup for {inverse_pair} failed: {exc}",
             )
-
-        ts = self._parse_timestamp(payload)
-        return spot, ts, "Twelve Data"
+        ts = self._parse_timestamp(inverse_payload)
+        return inverted_spot, ts, "Twelve Data (inverted)"
 
     def _fallback(self, base: str, quote: str, reason: str) -> tuple[float, str, str]:
         try:
@@ -150,6 +213,32 @@ class TwelveDataProvider(SpotProvider):
             raise RuntimeError(
                 f"{reason}. Fallback provider failed for {base}/{quote}: {exc}"
             ) from exc
+
+    def _request_exchange_rate(self, pair: str) -> dict[str, object]:
+        params = {"symbol": pair, "apikey": self.api_key}
+        response = requests.get(self.endpoint, params=params, timeout=self.timeout)
+        response.raise_for_status()
+        payload = response.json()
+        if not isinstance(payload, dict):
+            raise ValueError(
+                f"Twelve Data returned unexpected JSON structure for {pair}"
+            )
+        return payload
+
+    @staticmethod
+    def _extract_rate(
+        payload: dict[str, object], pair: str
+    ) -> tuple[float | None, str]:
+        if str(payload.get("status", "")).lower() == "error":
+            message = payload.get("message") or payload.get("code") or "unknown error"
+            return None, f"Twelve Data API error for {pair}: {message}"
+        try:
+            rate = float(payload["rate"])
+        except (KeyError, TypeError, ValueError):
+            return None, f"Twelve Data response missing numeric rate for {pair}"
+        if rate <= 0:
+            return None, f"Twelve Data response returned non-positive rate for {pair}"
+        return rate, ""
 
     @staticmethod
     def _parse_timestamp(payload: dict[str, object]) -> str:

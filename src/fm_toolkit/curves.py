@@ -2,11 +2,10 @@
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from math import exp
-import re
 from typing import Sequence
-
 
 _TENOR_PATTERN = re.compile(r"^\s*(\d+)\s*([DWMYdwmy])\s*$")
 
